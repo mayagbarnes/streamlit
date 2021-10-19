@@ -201,12 +201,12 @@ class TextArea extends React.PureComponent<Props, State> {
           onChange={this.onChange}
           onKeyDown={this.onKeyDown}
           disabled={disabled}
+          rows={height}
           overrides={{
             Input: {
               style: {
-                height: height ? `${height}px` : "",
-                minHeight: "95px",
-                resize: height ? "vertical" : "none",
+                // resize: height ? "vertical" : "none",
+                resize: "vertical",
               },
             },
           }}
