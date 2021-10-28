@@ -18,12 +18,12 @@
 describe("st.slider", () => {
   beforeEach(() => {
     cy.visit("http://localhost:3000/");
-
-    // Make the ribbon decoration line disappear
-    cy.get("[data-testid='stDecoration']").invoke("css", "display", "none");
   });
 
   it("looks right", () => {
+    // Make the ribbon decoration line disappear
+    cy.get("[data-testid='stDecoration']").invoke("css", "display", "none");
+
     cy.get(".stSlider")
       .first()
       .matchThemedSnapshots("slider");
