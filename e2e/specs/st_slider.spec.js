@@ -57,6 +57,9 @@ describe("st.slider", () => {
   });
 
   it("handles value changes", () => {
+    // Make the ribbon decoration line disappear
+    cy.get("[data-testid='stDecoration']").invoke("css", "display", "none");
+
     // trigger click in the center of the slider
     cy.get('.stSlider [role="slider"]')
       .first()
