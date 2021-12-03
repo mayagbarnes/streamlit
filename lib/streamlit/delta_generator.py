@@ -336,6 +336,7 @@ class DeltaGenerator(
         self,
         delta_type,
         element_proto,
+        disabled=None,
         return_value=None,
         last_index=None,
         element_width=None,
@@ -389,6 +390,8 @@ class DeltaGenerator(
 
         # Copy the marshalled proto into the overall msg proto
         msg = ForwardMsg_pb2.ForwardMsg()
+        if disabled is not None:
+            msg.delta.new_element.disabled = disabled
         msg_el_proto = getattr(msg.delta.new_element, proto_type)
         msg_el_proto.CopyFrom(element_proto)
 

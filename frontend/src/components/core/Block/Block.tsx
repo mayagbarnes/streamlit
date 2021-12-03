@@ -347,7 +347,7 @@ class Block extends PureComponent<Props> {
 
     const widgetProps = {
       widgetMgr: this.props.widgetMgr,
-      disabled: this.props.widgetsDisabled,
+      disabled: this.props.widgetsDisabled || node.element.disabled,
     }
 
     let height: number | undefined
