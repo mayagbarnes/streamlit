@@ -42,6 +42,8 @@ class RadioMixin:
         on_change: Optional[WidgetCallback] = None,
         args: Optional[WidgetArgs] = None,
         kwargs: Optional[WidgetKwargs] = None,
+        *,
+        disabled: bool = False,
     ) -> Any:
         """Display a radio button widget.
 
@@ -139,7 +141,7 @@ class RadioMixin:
             radio_proto.value = serialize_radio(current_value)
             radio_proto.set_value = True
 
-        self.dg._enqueue("radio", radio_proto)
+        self.dg._enqueue("radio", radio_proto, disabled)
         return cast(str, current_value)
 
     @property

@@ -38,6 +38,8 @@ class CheckboxMixin:
         on_change: Optional[WidgetCallback] = None,
         args: Optional[WidgetArgs] = None,
         kwargs: Optional[WidgetKwargs] = None,
+        *,
+        disabled: bool = False,
     ) -> bool:
         """Display a checkbox widget.
 
@@ -61,6 +63,9 @@ class CheckboxMixin:
             An optional tuple of args to pass to the callback.
         kwargs : dict
             An optional dict of kwargs to pass to the callback.
+        disabled: bool
+            An optional boolean to enabled or disable the checkbox. It is
+            enabled by default. This is a keyword only argument.
 
         Returns
         -------
@@ -106,7 +111,7 @@ class CheckboxMixin:
             checkbox_proto.value = current_value
             checkbox_proto.set_value = True
 
-        self.dg._enqueue("checkbox", checkbox_proto)
+        self.dg._enqueue("checkbox", checkbox_proto, disabled)
         return cast(bool, current_value)
 
     @property
