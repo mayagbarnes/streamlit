@@ -23,7 +23,13 @@ describe("st.select_slider", () => {
   });
 
   it("displays correct number of elements", () => {
-    cy.get(".element-container .stSlider").should("have.length", 5);
+    cy.get(".element-container .stSlider").should("have.length", 6);
+  });
+
+  it("looks right when disabled", () => {
+    cyGetIndexed(".stSlider", 4).matchThemedSnapshots(
+      "disabled-select-slider"
+    );
   });
 
   it("shows labels", () => {
@@ -36,6 +42,8 @@ describe("st.select_slider", () => {
     cyGetIndexed(".stSlider label", 3).should("have.text", "Label 4");
 
     cyGetIndexed(".stSlider label", 4).should("have.text", "Label 5");
+
+    cyGetIndexed(".stSlider label", 5).should("have.text", "Label 6");
   });
 
   it("has correct values", () => {
@@ -50,9 +58,14 @@ describe("st.select_slider", () => {
 
     cyGetIndexed(".stMarkdown", 3).should("have.text", "Value 4: 5");
 
-    cyGetIndexed(".stMarkdown", 4).should("have.text", "Value 5: 1");
+    cyGetIndexed(".stMarkdown", 4).should(
+      "have.text",
+      "Value 5: ('orange', 'blue')"
+    );
 
-    cyGetIndexed(".stMarkdown", 5).should(
+    cyGetIndexed(".stMarkdown", 5).should("have.text", "Value 6: 1");
+
+    cyGetIndexed(".stMarkdown", 6).should(
       "have.text",
       "Select slider changed: False"
     );
@@ -137,14 +150,14 @@ describe("st.select_slider", () => {
 
   it("calls callback if one is registered", () => {
     // This selects the slider ends, so range sliders have two, and this is the
-    // seventh element in the list.
-    cyGetIndexed('.stSlider [role="slider"]', 6)
+    // ninth element in the list.
+    cyGetIndexed('.stSlider [role="slider"]', 8)
       .click()
       .type("{rightarrow}", { force: true });
 
     cy.get(".stMarkdown").should(
       "contain.text",
-      "Value 5: 2" + "Select slider changed: True"
+      "Value 6: 2" + "Select slider changed: True"
     );
   });
 });
