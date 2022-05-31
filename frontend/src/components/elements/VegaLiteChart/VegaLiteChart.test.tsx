@@ -17,12 +17,12 @@
 
 import React from "react"
 import { mount } from "src/lib/test_util"
-import { fromJS } from "immutable"
+import { Map as ImmutableMap, fromJS } from "immutable"
 import { VegaLiteChart as VegaLiteChartProto } from "src/autogen/proto"
 import { darkTheme, lightTheme } from "src/theme"
 
 import mock from "./mock"
-import { PropsWithHeight, VegaLiteChart } from "./VegaLiteChart"
+import { PropsWithHeight, VegaLiteChart, dataIsAnAppendOfPrev } from "./VegaLiteChart"
 
 const getProps = (
   elementProps: Partial<VegaLiteChartProto> = {},
@@ -38,12 +38,75 @@ const getProps = (
   ...props,
 })
 
+const baseCase = ImmutableMap<any, any>(
+{"data": {
+  "values": [
+    {"a": "A", "b": 28}, {"a": "B", "b": 55}, {"a": "C", "b": 43},
+  ]
+}})
+
+// Not an append if # of columns don't match
+const testCase1 = ImmutableMap<any, any>(
+  {"data": {
+    "values": [
+      {"a": "A", "b": 28, "c": 0}, {"a": "B", "b": 55, "c": 0}, {"a": "C", "b": 43, "c": 0},
+    ]
+  }})
+
+// Not an append if prev # rows = current # rows
+const testCase2 = ImmutableMap<any, any>(
+  {"data": {
+    "values": [
+      {"a": "A", "b": 28}, {"a": "B", "b": 55}, {"a": "C", "b": 43},
+    ]
+  }})
+
+// Not an append if prev # rows > current # rows
+const testCase3 = ImmutableMap<any, any>(
+  {"data": {
+    "values": [
+      {"a": "A", "b": 28}, {"a": "B", "b": 55},
+    ]
+  }})
+
+// Not an append if prev # rows == 0
+const testCase4 = ImmutableMap<any, any>(
+{"data": {
+  "values": []
+}})
+
+// TODO: Test light check of prev vs. new's last col, first and last row 
+// const testCase5
+
+// TODO: Test an append
+// const testCase6
+
 describe("VegaLiteChart Element", () => {
   it("renders without crashing", () => {
     const props = getProps()
     const wrapper = mount(<VegaLiteChart {...props} />)
 
     expect(wrapper.find("StyledVegaLiteChartContainer").length).toBe(1)
+  })
+
+  it("tests for appended data properly", () => {
+    const cases = [ [baseCase, testCase1], [baseCase, testCase2], [baseCase, testCase3], [testCase4, baseCase]]
+    const expectedVals = [false, false, false, false]
+
+    cases.forEach( (test, idx) => {
+      const expected = expectedVals[idx]
+      const prevData = test[0]
+      const data = test[1]
+      const prevValuesObj = prevData.get("data")["values"]
+      const valuesObj = data.get("data")["values"]
+      const prevNumRows = prevValuesObj ? prevValuesObj.length : 0
+      const numRows = valuesObj.length
+      const prevNumCols = prevValuesObj[0] ? Object.keys(prevValuesObj[0]).length : 2
+      const numCols = Object.keys(valuesObj[0]).length
+
+      expect(dataIsAnAppendOfPrev(prevData, prevNumRows, prevNumCols, data, numRows, numCols)).toEqual(expected)
+    })
+
   })
 
   it("pulls default config values from theme", () => {
