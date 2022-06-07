@@ -69,7 +69,7 @@ class LayoutsMixin:
         return self.dg._block()
 
     # TODO: Enforce that columns are not nested or in Sidebar
-    def columns(self, spec: SpecType) -> List["DeltaGenerator"]:
+    def columns(self, spec: SpecType, *, gap: Optional[str] = None) -> List["DeltaGenerator"]:
         """Insert containers laid out as side-by-side columns.
 
         Inserts a number of multi-element containers laid out side-by-side and
@@ -97,6 +97,10 @@ class LayoutsMixin:
                 For example, `st.columns([3, 1, 2])` creates 3 columns where
                 the first column is 3 times the width of the second, and the last
                 column is 2 times that width.
+        gap : string (small, medium, or large)
+            An optional string, which indicates the size of the gap between each column.
+            The default is no gap between columns (None). This argument can only be supplied by
+            keyword.
 
         Returns
         -------
@@ -159,9 +163,29 @@ class LayoutsMixin:
         if len(weights) == 0 or any(weight <= 0 for weight in weights):
             raise weights_exception
 
+        # TODO mayabarnes: clean up helper function
+        def column_gap(gap):
+            if(gap is None):
+                return 0
+            else:
+                gap = gap.lower()
+                match gap:
+                    case "small":
+                        return 1
+                    case "medium":
+                        return 2
+                    case "large":
+                        return 3
+                    case _:
+                        raise StreamlitAPIException(
+                            "The gap argument to st.columns must be small, medium, large, or None"
+                        )
+
         def column_proto(normalized_weight: float) -> BlockProto:
             col_proto = BlockProto()
             col_proto.column.weight = normalized_weight
+            gap_width = column_gap(gap)
+            col_proto.column.gap = gap_width
             col_proto.allow_empty = True
             return col_proto
 

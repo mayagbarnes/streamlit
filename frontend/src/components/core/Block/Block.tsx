@@ -106,6 +106,7 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
       <StyledColumn
         weight={node.deltaBlock.column.weight ?? 0}
         data-testid="column"
+        gap={node.deltaBlock.column.gap ?? 0}
       >
         {child}
       </StyledColumn>
