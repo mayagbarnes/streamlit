@@ -19,16 +19,32 @@ import React from "react"
 import styled from "@emotion/styled"
 import { Theme } from "src/theme"
 
-export const StyledHorizontalBlock = styled.div(({ theme }) => ({
-  // While using flex for columns, padding is used for large screens and gap
-  // for small ones. This can be adjusted once more information is passed.
-  // More information and discussions can be found: Issue #2716, PR #2811
-  display: "flex",
-  flexWrap: "wrap",
-  flexGrow: 1,
-  alignItems: "stretch",
-  gap: theme.spacing.lg,
-}))
+export interface StyledHorizontalBlockProps {
+  gap: number
+}
+
+export const StyledHorizontalBlock = styled.div<StyledHorizontalBlockProps>(({ theme, gap }) => { 
+  let gap_width = theme.spacing.sm
+  if(gap === 1) {
+    gap_width = theme.spacing.twoXL
+  } else if(gap === 2) {
+    gap_width = theme.spacing.threeXL
+  } else if(gap === 3) {
+    gap_width = "3rem"
+  }
+  
+  return {
+    // While using flex for columns, padding is used for large screens and gap
+    // for small ones. This can be adjusted once more information is passed.
+    // More information and discussions can be found: Issue #2716, PR #2811
+    display: "flex",
+    flexWrap: "wrap",
+    flexGrow: 1,
+    alignItems: "stretch",
+    gap: gap_width,
+  }
+}
+)
 
 export interface StyledElementContainerProps {
   isStale: boolean
@@ -74,20 +90,26 @@ export const StyledElementContainer = styled.div<StyledElementContainerProps>(
 
 interface StyledColumnProps {
   weight: number
-  gap?: number
+  gap: number
 }
 
 export const StyledColumn = styled.div<StyledColumnProps>(
   ({ weight, gap, theme }) => {
     const percentage = weight * 100
-    const width = `calc(${percentage}% - ${theme.spacing.lg})`
-    const margin = gap ? gap * 1 : 0
+    let gap_width = theme.spacing.sm
+    if(gap === 1) {
+      gap_width = theme.spacing.twoXL
+    } else if(gap === 2) {
+      gap_width = theme.spacing.threeXL
+    } else if(gap === 3) {
+      gap_width = "3rem"
+    }
+    const width = `calc(${percentage}% - ${gap_width})`
 
     return {
       // Calculate width based on percentage, but fill all available space,
       // e.g. if it overflows to next row.
       width,
-      marginRight: `${margin}rem`,
       flex: `1 1 ${width}`,
 
       [`@media (max-width: ${theme.breakpoints.columns})`]: {

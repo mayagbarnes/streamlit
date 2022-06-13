@@ -102,11 +102,12 @@ const BlockNodeRenderer = (props: BlockPropsWithWidth): ReactElement => {
   }
 
   if (node.deltaBlock.column) {
+    console.log(node)
     return (
       <StyledColumn
         weight={node.deltaBlock.column.weight ?? 0}
-        data-testid="column"
         gap={node.deltaBlock.column.gap ?? 0}
+        data-testid="column"
       >
         {child}
       </StyledColumn>
@@ -174,8 +175,10 @@ const HorizontalBlock = (props: BlockPropsWithWidth): ReactElement => {
   // Create a horizontal block as the parent for columns.
   // The children are always columns, but this is not checked. We just trust the Python side to
   // do the right thing, then we ask ChildRenderer to handle it.
+  let gap = props.node.deltaBlock.horizontal?.gap ?? 0
+
   return (
-    <StyledHorizontalBlock data-testid="stHorizontalBlock">
+    <StyledHorizontalBlock gap={gap} data-testid="stHorizontalBlock">
       <ChildRenderer {...props} />
     </StyledHorizontalBlock>
   )

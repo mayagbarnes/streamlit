@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import cast, List, Sequence, TYPE_CHECKING, Union
+from typing import cast, List, Sequence, TYPE_CHECKING, Union, Optional
 
 from streamlit.beta_util import function_beta_warning
 from streamlit.errors import StreamlitAPIException
@@ -167,19 +167,18 @@ class LayoutsMixin:
         def column_gap(gap):
             if(gap is None):
                 return 0
+            gap_size = gap.lower()
+            if(gap_size == "small"):
+                return 1
+            elif(gap_size == "medium"):
+                return 2
+            elif(gap_size == "large"):
+                return 3
             else:
-                gap = gap.lower()
-                match gap:
-                    case "small":
-                        return 1
-                    case "medium":
-                        return 2
-                    case "large":
-                        return 3
-                    case _:
-                        raise StreamlitAPIException(
-                            "The gap argument to st.columns must be small, medium, large, or None"
-                        )
+                raise StreamlitAPIException(
+                    'The gap argument to st.columns must be \"small\", \"medium\", \"large\", or None.\n'
+                    f"The argument passed was \"{gap}\"."
+                )
 
         def column_proto(normalized_weight: float) -> BlockProto:
             col_proto = BlockProto()
@@ -190,7 +189,9 @@ class LayoutsMixin:
             return col_proto
 
         block_proto = BlockProto()
-        block_proto.horizontal.SetInParent()
+        # block_proto.horizontal.SetInParent()
+        gap_width = column_gap(gap)
+        block_proto.horizontal.gap = gap_width
         row = self.dg._block(block_proto)
         total_weight = sum(weights)
         return [row._block(column_proto(w / total_weight)) for w in weights]
