@@ -83,7 +83,7 @@ jobs:
         with:
           path: dot.bin
           key: v13_dot.bin-{{ checksum "~/dot.md5" }}
-      # make-init
+      # init
       - name: Install NVM, Node.js, and Yarn
         run:  if [ ! -d ~/.nvm ] ; then
                 # install nodejs via nvm
