@@ -3,8 +3,14 @@ name: python-max-version
 # **What it does**: Tests the latest supported Python minor version.
 
 on: [push]
+
+defaults:
+  run:
+    working-directory: ~/repo
+
 jobs:
-  build:
+  checkout:
+    name: Checkout Code
     runs-on: ubuntu-latest
     container: circleci/python:3.10.0
 
@@ -19,7 +25,14 @@ jobs:
       - name: Update submodules
         run:  git submodule init
               git submodule update --remote
-      # pre-cache:
+
+  pre-cache:
+    name: pre-cache
+    runs-on: ubuntu-latest
+    container: circleci/python:3.10.0
+    needs: checkout
+
+    steps:
       - name: Get 'make' checksum
         run:  echo 'export SUDO="sudo"' >> $BASH_ENV
               cp -f /usr/bin/make make.bin
@@ -42,7 +55,14 @@ jobs:
               date +%F >> ~/python_cache_key.md5
       - name: Create Yarn cache key
         run: md5sum frontend/yarn.lock > ~/yarn.lock.md5
-      # restore-from-cache:
+
+  restore-from-cache:
+    name: restore-from-cache
+    runs-on: ubuntu-latest
+    container: circleci/python:3.10.0
+    needs: [checkout, pre-cache]
+
+    steps:
       - name: Restore virtualenv from cache
         run: v13-python-venv-{{ checksum "~/python_cache_key.md5" }}
       - name: Restore nvm and node_modules from cache
@@ -50,8 +70,15 @@ jobs:
       - name: Restore make from cache
         run: v13_make.bin-{{ checksum "~/make.md5" }}
       - name: Restore dot from cache
-        run: v13_dot.bin-{{ checksum "~/dot.md5" }}  
-      # pre-make:
+        run: v13_dot.bin-{{ checksum "~/dot.md5" }}
+
+  pre-make:
+    name: pre-make
+    runs-on: ubuntu-latest
+    container: circleci/python:3.10.0
+    needs: [checkout, pre-cache, restore-from-cache]
+
+    steps:
       - name: Install make
         run: if [ -s make.bin ] ; then
               echo "make.bin exists; not installing"
@@ -72,17 +99,37 @@ jobs:
               cp -f /usr/bin/dot dot.bin
             fi
             ${SUDO} cp -f dot.bin /usr/bin/dot
-      # save_cache commands
+
+  save_make_and_dot_to_cache:
+    name: Save to cache
+    runs-on: ubuntu-latest
+    container: circleci/python:3.10.0
+    needs: [checkout, pre-cache, restore-from-cache, pre-make]
+
+    steps:
+      - uses: actions/cache@v3
+
       - name: Save make to cache
+        id: make-cache
         uses: actions/cache@v3
         with:
           path: make.bin
           key: v13_make.bin-{{ checksum "~/make.md5" }}
+
       - name: Save dot to cache
+        id: dot-cache
         uses: actions/cache@v3
         with:
           path: dot.bin
           key: v13_dot.bin-{{ checksum "~/dot.md5" }}
+
+  make-init: 
+    name: make-init
+    runs-on: ubuntu-latest
+    container: circleci/python:3.10.0
+    needs: [checkout, pre-cache, restore-from-cache, pre-make, save_make_and_dot_to_cache]
+
+    steps:
       - name: Install NVM, Node.js, and Yarn
         run:  if [ ! -d ~/.nvm ] ; then
                 # install nodejs via nvm
